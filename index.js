@@ -1,12 +1,12 @@
 import React, { PureComponent } from 'react'
-import { 
+import {
   Animated,
   Easing,
-  StyleSheet, 
-  Text, 
-  View, 
-  ScrollView, 
-  NativeModules, 
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  NativeModules,
   findNodeHandle
 } from 'react-native'
 import PropTypes from 'prop-types'
@@ -69,7 +69,7 @@ export default class TextMarquee extends PureComponent {
   }
 
   animateScroll = () => {
-    const {duration, marqueeDelay, loop, useNativeDriver, repeatSpacer, easing, children} = this.props 
+    const {duration, marqueeDelay, loop, useNativeDriver, repeatSpacer, easing, children} = this.props
     this.setTimeout(() => {
       Animated.timing(this.animatedValue, {
         toValue:         -this.textWidth - repeatSpacer,
@@ -95,14 +95,14 @@ export default class TextMarquee extends PureComponent {
           toValue:         -this.distance - 10,
           duration:        duration || children.length * 50,
           easing:          easing,
-          useNativeDriver: useNativeDriver        
+          useNativeDriver: useNativeDriver
         }),
         Animated.timing(this.animatedValue, {
           toValue:         10,
           duration:        duration || children.length * 50,
           easing:          easing,
-          useNativeDriver: useNativeDriver        
-        })        
+          useNativeDriver: useNativeDriver
+        })
       ]).start(({finished}) => {
         if (loop) {
           this.animateBounce()
@@ -129,28 +129,28 @@ export default class TextMarquee extends PureComponent {
     this.animatedValue.setValue(0)
     this.setState({ animating: false, shouldBounce: false })
   }
-  
+
   async calculateMetrics() {
     return new Promise(async (resolve, reject) => {
       try {
-        const measureWidth = node => 
+        const measureWidth = node =>
           new Promise(resolve => {
             UIManager.measure(findNodeHandle(node), (x, y, w) => {
               // console.log('Width: ' + w)
               return resolve(w)
             })
           })
-        
+
         const [containerWidth, textWidth] = await Promise.all([
           measureWidth(this.containerRef),
           measureWidth(this.textRef)
         ])
-  
+
         this.containerWidth = containerWidth
         this.textWidth = textWidth
         this.distance = textWidth - containerWidth
-                
-        this.setState({ 
+
+        this.setState({
           // Is 1 instead of 0 to get round rounding errors from:
           // https://github.com/facebook/react-native/commit/a534672
           contentFits:  this.distance <= 1,
@@ -195,9 +195,9 @@ export default class TextMarquee extends PureComponent {
     const { style, children, repeatSpacer, scroll, ... props } = this.props
     const { animating, contentFits, isScrolling } = this.state
     return (
-      <View style={[styles.container]}>
-        <Text 
-          {...props} 
+      <View style={[styles.container, !contentFits && { flex: 1 }]}>
+        <Text
+          {...props}
           numberOfLines={1}
           style={[style, { opacity: animating ? 0 : 1 }]}
         >
@@ -220,7 +220,7 @@ export default class TextMarquee extends PureComponent {
             {... props}
             style={[style, { transform: [{ translateX: this.animatedValue }], width: null }]}
           >
-            {this.props.children}           
+            {this.props.children}
           </Animated.Text>
           {!contentFits && !isScrolling
             ? <View style={{ paddingLeft: repeatSpacer }}>
@@ -229,7 +229,7 @@ export default class TextMarquee extends PureComponent {
                 {... props}
                 style={[style, { transform: [{ translateX: this.animatedValue }], width: null }]}
               >
-                {this.props.children}           
+                {this.props.children}
               </Animated.Text>
             </View> : null }
         </ScrollView>
