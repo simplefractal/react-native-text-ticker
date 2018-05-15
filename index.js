@@ -61,6 +61,15 @@ export default class TextMarquee extends PureComponent {
     }
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (this.props.children !== nextProps.children) {
+      this.stopAnimation()
+      this.clearTimeout()
+      this.invalidateMetrics()
+      this.start()
+    }
+  }
+
   startAnimation = (timeDelay) => {
     if (this.state.animating) {
       return
@@ -78,7 +87,7 @@ export default class TextMarquee extends PureComponent {
         useNativeDriver: useNativeDriver
       }).start(({ finished }) => {
         if (finished) {
-          if (loop) {
+          if (loop && !this.state.contentFits) {
             this.animatedValue.setValue(0)
             this.animateScroll()
           }
@@ -104,7 +113,7 @@ export default class TextMarquee extends PureComponent {
           useNativeDriver: useNativeDriver
         })
       ]).start(({finished}) => {
-        if (loop) {
+        if (loop && !this.state.contentFits) {
           this.animateBounce()
         }
       })
