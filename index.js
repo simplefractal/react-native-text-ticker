@@ -62,7 +62,10 @@ export default class TextMarquee extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.children !== nextProps.children) {
+    if (
+      this.props.children !== nextProps.children ||
+      this.props.resetTrigger !== nextProps.resetTrigger
+    ) {
       this.stopAnimation()
       this.clearTimeout()
       this.invalidateMetrics()
