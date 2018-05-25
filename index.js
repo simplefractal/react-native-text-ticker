@@ -145,31 +145,33 @@ export default class TextMarquee extends PureComponent {
   async calculateMetrics() {
     return new Promise(async (resolve, reject) => {
       try {
-        const measureWidth = node =>
-          new Promise(resolve => {
-            UIManager.measure(findNodeHandle(node), (x, y, w) => {
-              // console.log('Width: ' + w)
-              return resolve(w)
+        if (this.containerRef && this.textRef) {
+          const measureWidth = node =>
+            new Promise(resolve => {
+              UIManager.measure(findNodeHandle(node), (x, y, w) => {
+                // console.log('Width: ' + w)
+                return resolve(w)
+              })
             })
+
+          const [containerWidth, textWidth] = await Promise.all([
+            measureWidth(this.containerRef),
+            measureWidth(this.textRef)
+          ])
+
+          this.containerWidth = containerWidth
+          this.textWidth = textWidth
+          this.distance = textWidth - containerWidth
+
+          this.setState({
+            // Is 1 instead of 0 to get round rounding errors from:
+            // https://github.com/facebook/react-native/commit/a534672
+            contentFits:  this.distance <= 1,
+            shouldBounce: this.distance < this.containerWidth / 8
           })
-
-        const [containerWidth, textWidth] = await Promise.all([
-          measureWidth(this.containerRef),
-          measureWidth(this.textRef)
-        ])
-
-        this.containerWidth = containerWidth
-        this.textWidth = textWidth
-        this.distance = textWidth - containerWidth
-
-        this.setState({
-          // Is 1 instead of 0 to get round rounding errors from:
-          // https://github.com/facebook/react-native/commit/a534672
-          contentFits:  this.distance <= 1,
-          shouldBounce: this.distance < this.containerWidth / 8
-        })
-        // console.log(`distance: ${this.distance}, contentFits: ${this.state.contentFits}`)
-        resolve([])
+          // console.log(`distance: ${this.distance}, contentFits: ${this.state.contentFits}`)
+          resolve([])
+        }
       } catch (error) {
         console.warn(error)
       }
